@@ -5,7 +5,7 @@
 #### To get started:
 
 ```
-git clone 
+git clone https://github.cainc.com/ashilman/fullproof.git
 cd fullproof
 npm i
 npm run start:dev
