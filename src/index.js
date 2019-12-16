@@ -14,6 +14,22 @@ if (require('electron-squirrel-startup')) { // eslint-disable-line global-requir
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow;
+let recorderWindow;
+
+const createRecorderWindow = () => {
+  recorderWindow = new BrowserWindow({
+    width: 400,
+    height: 400,
+    webPreferences: {
+      nodeIntegration: true,
+    }
+  });
+  if (inDebugMode) {
+    recorderWindow.webContents.openDevTools();
+  }
+  recorderWindow.loadURL(`file://${__dirname}/recorder/index.html`);
+  recorderWindow.on('closed', () => recorderWindow = null)
+};
 
 const createWindow = (url) => {
   // Create the browser window.
@@ -41,7 +57,7 @@ const createWindow = (url) => {
       console.log(cookies)
     }).catch((error) => {
     console.log(error)
-  })
+  });
   mainSession.cookies.get({}, (error, cookies) => {
     console.log('cookies', cookies);
   });
@@ -62,7 +78,10 @@ const createWindow = (url) => {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on('ready', createWindow);
+app.on('ready', () => {
+  createWindow();
+  createRecorderWindow();
+});
 
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {
@@ -79,6 +98,10 @@ app.on('activate', () => {
   if (mainWindow === null) {
     createWindow();
   }
+  
+  if (recorderWindow === null) {
+    createRecorderWindow();
+  }
 });
 
 app.on('open-url', (event, url) => {
@@ -90,7 +113,10 @@ app.on('open-url', (event, url) => {
   if (mainWindow === null) {
     createWindow(urlToLoad);
   }
-  // dialog.showErrorBox('Welcome Back', `You arrived from: ${url}`)
+  
+  if (recorderWindow === null) {
+    createRecorderWindow();
+  }
 });
 
 // In this file you can include the rest of your app's specific main process
