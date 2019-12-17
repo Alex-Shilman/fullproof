@@ -5,6 +5,7 @@ const { isString } = require('lodash');
 const inDebugMode = /debug/.test(process.argv[2]);
 const PROTOCOL = 'fullproof';
 const APP_NAME = 'FullProof App';
+const QUIT_PATH = 'quit';
 const headerOptions = {
   userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36' };
 const KIOSK_MODE = false;
@@ -87,8 +88,8 @@ const createWindow = (externalUrl) => {
     };
     console.log(cookie);
     const cookies = {
-      'AWSALB': 'OAvTqISzikUbr0xtn6JOLiMYvD+vtwlwV6qrpN4oLZrTqxtBP1B/LcLv1MhYQ/iMJaRhf21lanSqg8JbiHt299Zfyag29Ag1bddbF8aQ23eV5DhQalSPKW91uyDP',
-      'JSESSIONID': 'A32E436055EF3E5A65CF63995D38A5AF'
+      AWSALB:"2IHa8aoWfHIw5KLAP2XcwJ5icaWyaDp5z5uTj9EtQB8DH1ukA1gCtgwZl13QMA9aOoiD8Hj3Bx+KJPPMn5P3YxijpM3eBZLSN5JgLgXKUUyaGJq/WviJwratHCm0",
+      JSESSIONID:"6E61BE62E1046ADE1E816160A55E5809"
     };
     const filter = {
       urls: [`http://*/`, 'http://electra.i-ready.com/*', 'https://electra.i-ready.com/*']
@@ -166,9 +167,13 @@ app.on('activate', () => {
 });
 
 app.on('open-url', (event, url) => {
+  console.log('open-url', url);
   let urlToLoad;
   if (isString(url)) {
     urlToLoad = url.split(`${PROTOCOL}://`)[1];
+    if (urlToLoad === QUIT_PATH) {
+      return app.quit();
+    }
   }
  
   if (mainWindow === null) {
