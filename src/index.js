@@ -8,6 +8,9 @@ const APP_NAME = 'FullProof App';
 const headerOptions = {
   userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36' };
 const KIOSK_MODE = false;
+
+require('electron-reload')(__dirname);
+
 (process.mas) && app.setName(APP_NAME);
 app.setAsDefaultProtocolClient(PROTOCOL);
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -86,7 +89,7 @@ const createWindow = (externalUrl) => {
     const cookies = {
       'AWSALB': 'OAvTqISzikUbr0xtn6JOLiMYvD+vtwlwV6qrpN4oLZrTqxtBP1B/LcLv1MhYQ/iMJaRhf21lanSqg8JbiHt299Zfyag29Ag1bddbF8aQ23eV5DhQalSPKW91uyDP',
       'JSESSIONID': 'A32E436055EF3E5A65CF63995D38A5AF'
-    }
+    };
     const filter = {
       urls: [`http://*/`, 'http://electra.i-ready.com/*', 'https://electra.i-ready.com/*']
     };
