@@ -1,4 +1,5 @@
 const { app, session, BrowserWindow } = require('electron');
+const path = require('path');
 const url = require('url');
 const { isString } = require('lodash');
 const inDebugMode = /debug/.test(process.argv[2]);
@@ -44,18 +45,15 @@ const createWindow = (externalUrl) => {
     fullscreen: true,
     title: APP_NAME,
     kiosk: KIOSK_MODE,
+    icon: path.join(__dirname, 'assets/fp-logo.png'),
     webPreferences: {
       nodeIntegration: true,
-      session,
     }
   });
   const mainSession = mainWindow.webContents.session;
   
   mainWindow.webContents.on('dom-ready', () => {
     console.log('dom-ready');
-    mainWindow.webContents.session.cookies.get({}, (error, cookies) => {
-      console.log('my cookies', cookies);
-    });
   });
   
   mainWindow.once('ready-to-show', () => {
@@ -67,9 +65,9 @@ const createWindow = (externalUrl) => {
     console.log('showing');
     mainWindow.webContents.session.cookies.get({})
       .then(cookies => {
-        console.log('------on show cookies');
-        console.log(cookies);
-        console.log('------on show cookies');
+        // console.log('------on show cookies');
+        // console.log(cookies);
+        // console.log('------on show cookies');
       })
       .catch(error => {
         console.log('on show error');
@@ -77,27 +75,47 @@ const createWindow = (externalUrl) => {
  });
   
   if (isString(externalUrl)) {
-    const { query: { token } } = url.parse(externalUrl, true);
-    console.log('here ==>', token);
-    mainWindow.loadURL(`http://${externalUrl}`, headerOptions);
+    const { pathname, query: { token } } = url.parse(externalUrl, true);
+    const cookie = {
+      url : `https://${pathname}`,
+      name : 'test',
+      value : token,
+      domain: '.i-ready.com'
+    };
+    console.log(cookie);
+    const cookies = {
+      'AWSALB': 'OAvTqISzikUbr0xtn6JOLiMYvD+vtwlwV6qrpN4oLZrTqxtBP1B/LcLv1MhYQ/iMJaRhf21lanSqg8JbiHt299Zfyag29Ag1bddbF8aQ23eV5DhQalSPKW91uyDP',
+      'JSESSIONID': 'A32E436055EF3E5A65CF63995D38A5AF'
+    }
+    const filter = {
+      urls: [`http://*/`, 'http://electra.i-ready.com/*', 'https://electra.i-ready.com/*']
+    };
+    session.defaultSession.webRequest.onBeforeSendHeaders(filter, (details, callback) => {
+      details.requestHeaders['User-Agent'] = headerOptions.userAgent;
+      details.requestHeaders['Cookie'] = Object.keys(cookies).map(key => `${key}=${cookies[key]}`).join(';');
+      callback({ requestHeaders: details.requestHeaders })
+    });
+    mainWindow.loadURL(`http://${externalUrl}`);
+    // mainWindow.loadURL(`http://${externalUrl}`, headerOptions)
   } else {
-    // mainWindow.loadURL(`file://${__dirname}/index.html`);
+    mainWindow.loadURL(`file://${__dirname}/index.html`)
+    // mainWindow.loadURL(`about:blank`)
   }
   
   // and load the index.html of the app.
   session.defaultSession.cookies.get({})
     .then((cookies) => {
-      console.log('-------defaultSession---------')
-      console.log(cookies)
-      console.log('-------defaultSession---------')
+      // console.log('-------defaultSession---------')
+      // console.log(cookies)
+      // console.log('-------defaultSession---------')
     }).catch((error) => {
     console.log(error)
   });
   mainSession.cookies.get({})
     .then((cookies) => {
-      console.log('------cookies------');
-      console.log(cookies);
-      console.log('------cookies------');
+      // console.log('------cookies------');
+      // console.log(cookies);
+      // console.log('------cookies------');
     }).catch((error) => {
       console.log('error');
   });
