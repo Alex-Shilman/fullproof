@@ -30,6 +30,7 @@ const createRecorderWindow = () => {
     height: 400,
     webPreferences: {
       nodeIntegration: true,
+      additionalArguments: ['test'],
       session,
     }
   });
