@@ -1,3 +1,4 @@
+const verifyToken = require('./utils');
 const { app, session, BrowserWindow } = require('electron');
 const path = require('path');
 const url = require('url');
@@ -41,7 +42,7 @@ const createRecorderWindow = () => {
   recorderWindow.on('closed', () => recorderWindow = null)
 };
 
-const createWindow = (externalUrl) => {
+const createWindow = async externalUrl => {
   // Create the browser window.
   mainWindow = new BrowserWindow({
     show: false,
@@ -81,19 +82,25 @@ const createWindow = (externalUrl) => {
   
   if (isString(externalUrl)) {
     const { pathname, query: { token } } = url.parse(externalUrl, true);
-    const cookie = {
-      url : `https://${pathname}`,
-      name : 'test',
-      value : token,
-      domain: '.i-ready.com'
-    };
-    console.log(cookie);
+    // const cookie = {
+    //   url : `https://${pathname}`,
+    //   name : 'test',
+    //   value : token,
+    //   domain: '.i-ready.com'
+    // };
+    const coookies_2 = await verifyToken(token);
+    console.log('here ==>', coookies_2);
     const cookies = {
       AWSALB:"2IHa8aoWfHIw5KLAP2XcwJ5icaWyaDp5z5uTj9EtQB8DH1ukA1gCtgwZl13QMA9aOoiD8Hj3Bx+KJPPMn5P3YxijpM3eBZLSN5JgLgXKUUyaGJq/WviJwratHCm0",
       JSESSIONID:"6E61BE62E1046ADE1E816160A55E5809"
     };
     const filter = {
-      urls: [`http://*/`, 'http://electra.i-ready.com/*', 'https://electra.i-ready.com/*']
+      urls: [
+        `http://*/`,
+        'http://electra.i-ready.com/*',
+        'https://electra.i-ready.com/*',
+        'http://dev.i-ready.com:3000/*'
+      ]
     };
     session.defaultSession.webRequest.onBeforeSendHeaders(filter, (details, callback) => {
       details.requestHeaders['User-Agent'] = headerOptions.userAgent;

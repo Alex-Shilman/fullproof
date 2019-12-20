@@ -45,6 +45,7 @@
   "dependencies": {
     "electron-reload": "^1.5.0",
     "electron-squirrel-startup": "^1.0.0",
+    "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.15",
     "ps-list": "^6.3.0",
     "ps-node": "^0.1.6",
