@@ -88,12 +88,14 @@ const createWindow = async externalUrl => {
     //   value : token,
     //   domain: '.i-ready.com'
     // };
-    const coookies_2 = await verifyToken(token);
-    console.log('here ==>', coookies_2);
-    const cookies = {
-      AWSALB:"2IHa8aoWfHIw5KLAP2XcwJ5icaWyaDp5z5uTj9EtQB8DH1ukA1gCtgwZl13QMA9aOoiD8Hj3Bx+KJPPMn5P3YxijpM3eBZLSN5JgLgXKUUyaGJq/WviJwratHCm0",
-      JSESSIONID:"6E61BE62E1046ADE1E816160A55E5809"
-    };
+    const { error, decoded: { payload } = {} } = await verifyToken(token);
+    (error) && console.log('error', error);
+ 
+    console.log('here ==>', payload);
+    // const cookies = {
+    //   AWSALB:"2IHa8aoWfHIw5KLAP2XcwJ5icaWyaDp5z5uTj9EtQB8DH1ukA1gCtgwZl13QMA9aOoiD8Hj3Bx+KJPPMn5P3YxijpM3eBZLSN5JgLgXKUUyaGJq/WviJwratHCm0",
+    //   JSESSIONID:"6E61BE62E1046ADE1E816160A55E5809"
+    // };
     const filter = {
       urls: [
         `http://*/`,
@@ -104,7 +106,7 @@ const createWindow = async externalUrl => {
     };
     session.defaultSession.webRequest.onBeforeSendHeaders(filter, (details, callback) => {
       details.requestHeaders['User-Agent'] = headerOptions.userAgent;
-      details.requestHeaders['Cookie'] = Object.keys(cookies).map(key => `${key}=${cookies[key]}`).join(';');
+      details.requestHeaders['Cookie'] = Object.keys(payload).map(key => `${key}=${payload[key]}`).join(';');
       callback({ requestHeaders: details.requestHeaders })
     });
     mainWindow.loadURL(`http://${externalUrl}`);

@@ -9,11 +9,12 @@ const getKey = async pathToPKey => await promisify(fs.readFile)(pathToPKey, 'UTF
 
 const verifyToken = async token => {
   const cert = await getKey(path.join(__dirname, '..', 'keys', 'jwtRS256.key.pub'));
-  return new Promise((resolve, reject) => jwt.verify(token, cert, { algorithms: ['RS256'] }, (err, decoded) => {
+  const options = { algorithms: ['RS256'], issuer: 'auth0' };
+  return new Promise(resolve => jwt.verify(token, cert, options, (err, decoded) => {
     if (err){
-      reject(err);
+      resolve({error, decoded: null});
     } else {
-      resolve(decoded);
+      resolve({error: null, decoded});
     }
   }));
 };
