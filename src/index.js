@@ -8,10 +8,9 @@ const PROTOCOL = 'fullproof';
 const APP_NAME = 'FullProof App';
 const QUIT_PATH = 'quit';
 const headerOptions = {
+  // need to spoof the userAgent for i-ready not to display black list message
   userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36' };
 const KIOSK_MODE = false;
-
-require('electron-reload')(__dirname);
 
 (process.mas) && app.setName(APP_NAME);
 app.setAsDefaultProtocolClient(PROTOCOL);
@@ -22,13 +21,15 @@ if (require('electron-squirrel-startup')) { // eslint-disable-line global-requir
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
-let mainWindow;
-let recorderWindow;
+let mainWindow = null;
+let recorderWindow = null;
 
 const createRecorderWindow = () => {
   recorderWindow = new BrowserWindow({
-    width: 400,
-    height: 400,
+    width: 335,
+    height: 320,
+    modal: true,
+    resizable: false,
     webPreferences: {
       nodeIntegration: true,
       additionalArguments: ['test'],
@@ -38,6 +39,11 @@ const createRecorderWindow = () => {
   if (inDebugMode) {
     recorderWindow.webContents.openDevTools();
   }
+  app.dock.hide();
+  recorderWindow.setAlwaysOnTop(true, 'floating');
+  recorderWindow.setVisibleOnAllWorkspaces(true);
+  recorderWindow.setFullScreenable(false);
+  app.dock.show();
   recorderWindow.loadURL(`file://${__dirname}/recorder/index.html`);
   recorderWindow.on('closed', () => recorderWindow = null)
 };
@@ -56,46 +62,25 @@ const createWindow = async externalUrl => {
       nodeIntegration: true,
     }
   });
-  const mainSession = mainWindow.webContents.session;
-  
+  mainWindow.setFullScreenable(true);
   mainWindow.webContents.on('dom-ready', () => {
     console.log('dom-ready');
   });
   
   mainWindow.once('ready-to-show', () => {
-    console.log('ready-to-show')
+    console.log('ready-to-show');
     mainWindow.show();
   });
   
   mainWindow.on('show', () => {
     console.log('showing');
-    mainWindow.webContents.session.cookies.get({})
-      .then(cookies => {
-        // console.log('------on show cookies');
-        // console.log(cookies);
-        // console.log('------on show cookies');
-      })
-      .catch(error => {
-        console.log('on show error');
-      });
  });
   
   if (isString(externalUrl)) {
     const { pathname, query: { token } } = url.parse(externalUrl, true);
-    // const cookie = {
-    //   url : `https://${pathname}`,
-    //   name : 'test',
-    //   value : token,
-    //   domain: '.i-ready.com'
-    // };
     const { error, decoded: { payload } = {} } = await verifyToken(token);
     (error) && console.log('error', error);
- 
-    console.log('here ==>', payload);
-    // const cookies = {
-    //   AWSALB:"2IHa8aoWfHIw5KLAP2XcwJ5icaWyaDp5z5uTj9EtQB8DH1ukA1gCtgwZl13QMA9aOoiD8Hj3Bx+KJPPMn5P3YxijpM3eBZLSN5JgLgXKUUyaGJq/WviJwratHCm0",
-    //   JSESSIONID:"6E61BE62E1046ADE1E816160A55E5809"
-    // };
+    
     const filter = {
       urls: [
         `http://*/`,
@@ -110,29 +95,11 @@ const createWindow = async externalUrl => {
       callback({ requestHeaders: details.requestHeaders })
     });
     mainWindow.loadURL(`http://${externalUrl}`);
-    // mainWindow.loadURL(`http://${externalUrl}`, headerOptions)
   } else {
     mainWindow.loadURL(`file://${__dirname}/index.html`)
-    // mainWindow.loadURL(`about:blank`)
   }
   
   // and load the index.html of the app.
-  session.defaultSession.cookies.get({})
-    .then((cookies) => {
-      // console.log('-------defaultSession---------')
-      // console.log(cookies)
-      // console.log('-------defaultSession---------')
-    }).catch((error) => {
-    console.log(error)
-  });
-  mainSession.cookies.get({})
-    .then((cookies) => {
-      // console.log('------cookies------');
-      // console.log(cookies);
-      // console.log('------cookies------');
-    }).catch((error) => {
-      console.log('error');
-  });
   // Open the DevTools.
   if (inDebugMode) {
     mainWindow.webContents.openDevTools();
@@ -144,6 +111,7 @@ const createWindow = async externalUrl => {
     // in an array if your app supports multi windows, this is the time
     // when you should delete the corresponding element.
     mainWindow = null;
+    recorderWindow && recorderWindow.close();
   });
 };
 
@@ -151,6 +119,7 @@ const createWindow = async externalUrl => {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', () => {
+  // remove this if only want to open app from URL
   createWindow();
   createRecorderWindow();
 });

@@ -54,12 +54,13 @@ function getFileName() {
 }
 
 btnRecord.onclick = function() {
-  if (this.textContent === 'START') {
+  const status = this.getAttribute('data-status');
+  if (status === 'START') {
     startRecording();
-    this.textContent = 'STOP';
+    this.setAttribute('data-status', 'STOP');
   } else {
     stopRecording();
-    this.textContent = 'START';
+    this.setAttribute('data-status', 'START');
   }
 };
 

@@ -2,3 +2,21 @@ video {
   width: 320px;
   height: 240px;
 }
+#btnRecord {
+  height: 35px;
+  width:100%;
+  display:block;
+}
+
+#btnRecord > svg {
+  height: 33px;
+  width: 33px;
+}
+
+[data-status="START"] svg{
+  color: black;
+}
+
+[data-status="STOP"] svg{
+  color: red;
+}
