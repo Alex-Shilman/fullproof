@@ -80,7 +80,7 @@ const createWindow = async externalUrl => {
     const { pathname, query: { token } } = url.parse(externalUrl, true);
     const { error, decoded: { payload } = {} } = await verifyToken(token);
     (error) && console.log('error', error);
-    
+    // only open the following urls
     const filter = {
       urls: [
         `http://*/`,
@@ -94,6 +94,7 @@ const createWindow = async externalUrl => {
       details.requestHeaders['Cookie'] = Object.keys(payload).map(key => `${key}=${payload[key]}`).join(';');
       callback({ requestHeaders: details.requestHeaders })
     });
+    console.log('opening', externalUrl);
     mainWindow.loadURL(`http://${externalUrl}`);
   } else {
     mainWindow.loadURL(`file://${__dirname}/index.html`)
